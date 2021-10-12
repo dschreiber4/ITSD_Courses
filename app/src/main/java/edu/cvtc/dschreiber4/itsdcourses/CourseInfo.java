@@ -21,37 +21,6 @@ public class CourseInfo implements Parcelable {
         mTitle = title;
         mDescription = description;
     }
-    protected CourseInfo(Parcel parcel) {
-    }
-
-    public static final Creator<CourseInfo> CREATOR = new Creator<CourseInfo>() {
-        @Override
-        public CourseInfo createFromParcel(Parcel in) {
-            return new CourseInfo(in);
-        }
-
-        @Override
-        public CourseInfo[] newArray(int size) {
-            return new CourseInfo[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-    }
-
-    //Equals method to stop duplicate courses from being added
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CourseInfo that = (CourseInfo) o;
-        return getCompareKey().equals(that.getCompareKey());
-    }
 
     //Getters and Setters
     public int getId() {
@@ -77,4 +46,52 @@ public class CourseInfo implements Parcelable {
     private String getCompareKey() {
         return mTitle + "|" + mDescription;
     }
+
+    //Equals method to stop duplicate courses from being added
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CourseInfo that = (CourseInfo) o;
+        return getCompareKey().equals(that.getCompareKey());
+    }
+
+    @Override
+    public int hashCode(){
+        return getCompareKey().hashCode();
+    }
+
+    @Override
+    public String toString(){
+        return getCompareKey();
+    }
+
+    protected CourseInfo(Parcel parcel) {
+        mTitle = parcel.readString();
+        mDescription = parcel.readString();
+    }
+
+    //Write the title and description to the parcel package
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(mTitle);
+        parcel.writeString(mDescription);
+    }
+
+    @Override
+    public int describeContents(){
+        return 0;
+    }
+
+    public static final Creator<CourseInfo> CREATOR = new Creator<CourseInfo>() {
+        @Override
+        public CourseInfo createFromParcel(Parcel parcel) {
+            return new CourseInfo(parcel);
+        }
+
+        @Override
+        public CourseInfo[] newArray(int size) {
+            return new CourseInfo[size];
+        }
+    };
 }
