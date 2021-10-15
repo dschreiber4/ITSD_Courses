@@ -5,8 +5,7 @@ import android.os.Parcelable;
 
 public class CourseInfo implements Parcelable {
 
-
-    //Atributes
+    //Attributes
     private String mTitle;
     private String mDescription;
     private int mId;
@@ -68,8 +67,8 @@ public class CourseInfo implements Parcelable {
     }
 
     protected CourseInfo(Parcel parcel) {
-        //mTitle = parcel.readString();
-        //mDescription = parcel.readString();
+        mTitle = parcel.readString();
+        mDescription = parcel.readString();
     }
 
     //Write the title and description to the parcel package

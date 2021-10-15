@@ -14,4 +14,6 @@
     <string name="menu_cancel_text">Cancel</string>
     <string name="menu_main_text">Menu</string>
     <string name="add">Add</string>
+    <string name="course_title_hint">Course Title</string>
+    <string name="course_description_hint">Course Description</string>
 </resources>

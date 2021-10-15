@@ -7,22 +7,21 @@ import edu.cvtc.dschreiber4.itsdcourses.ITSDCoursesDatabaseContract.CourseInfoEn
 public class ITSDCoursesDataWorker {
 
     //Attributes
-    private SQLiteDatabase mDB;
+    private SQLiteDatabase mDb;
 
     //Constructor
     public ITSDCoursesDataWorker(SQLiteDatabase db) {
-        mDB = db;
+        mDb = db;
     }
 
     //Methods
-
     //Take in parameters title and description
     private void insertCourse(String title, String description) {
         ContentValues values = new ContentValues();
         values.put(CourseInfoEntry.COLUMN_COURSE_TITLE,title);
         values.put(CourseInfoEntry.COLUMN_COURSE_DESCRIPTION,description);
 
-        long newRowId = mDB.insert(CourseInfoEntry.TABLE_NAME, null, values);
+        long newRowId = mDb.insert(CourseInfoEntry.TABLE_NAME, null, values);
     }
 
     //Populate the db with initial data

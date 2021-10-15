@@ -10,6 +10,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ITSDCourses">
         <activity
+            android:name=".CourseActivity"
+            android:exported="true"
+            android:label="View Course"
+            android:parentActivityName=".MainActivity"/>
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"

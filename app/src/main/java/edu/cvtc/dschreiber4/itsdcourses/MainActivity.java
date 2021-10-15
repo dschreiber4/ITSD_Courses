@@ -1,20 +1,26 @@
 package edu.cvtc.dschreiber4.itsdcourses;
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+import edu.cvtc.dschreiber4.itsdcourses.ITSDCoursesDatabaseContract.CourseInfoEntry;
+
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     // Member variables
     private ITSDCoursesOpenHelper mDbOpenHelper;
@@ -22,6 +28,11 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayoutManager mCoursesLayoutManager;
     private CourseRecyclerAdapter mCourseRecyclerAdapter;
 
+    //Constant
+    public static final int LOADER_COURSES = 0;
+
+    // Boolean to check if the 'onCreateLoader' method has run
+    private boolean mIsCreated = false;
 
     @Override
      protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Write something here", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                startActivity(new Intent(MainActivity.this, CourseActivity.class));
             }
         });
         initializeDisplayContent();
@@ -54,26 +64,51 @@ public class MainActivity extends AppCompatActivity {
         mCoursesLayoutManager = new LinearLayoutManager(this);
 
         // Get your courses
-        List<CourseInfo> courses = DataManager.getInstance().getCourses();
-
-        // Fill the RecyclerAdapter with your courses
-        mCourseRecyclerAdapter = new CourseRecyclerAdapter(this, courses);
+        mCourseRecyclerAdapter = new CourseRecyclerAdapter(this, null);
 
         // Display the courses
         displayCourses();
     }
 
-
     private void displayCourses() {
-
         mRecyclerItems.setLayoutManager(mCoursesLayoutManager);
         mRecyclerItems.setAdapter(mCourseRecyclerAdapter);
     }
+
     @Override
     protected void onDestroy() {
-
         mDbOpenHelper.close();
         super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //Get the latest data from the DB
+        loadCourses();
+    }
+
+    private void loadCourses() {
+        //Open the DB in Read mode
+        SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
+
+        //Create a list of columns from the DB to return
+        String[] courseColumns = {
+                CourseInfoEntry.COLUMN_COURSE_TITLE,
+                CourseInfoEntry.COLUMN_COURSE_DESCRIPTION,
+                CourseInfoEntry._ID
+        };
+
+        //Create the order by field with RecyclerAdapter
+        String courseOrderBy = CourseInfoEntry.COLUMN_COURSE_TITLE;
+
+        //Populate the cursor
+        final Cursor courseCursor = db.query(CourseInfoEntry.TABLE_NAME, courseColumns,
+                null, null, null, null,
+                courseOrderBy);
+
+        //Associate the cursor with RecyclerAdapter
+        mCourseRecyclerAdapter.changeCursor(courseCursor);
     }
 
     @Override
@@ -81,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-
         return true;
     }
 
@@ -97,4 +131,87 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @NonNull
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+        // Create new cursor loader
+        CursorLoader loader = null;
+
+        if (id == LOADER_COURSES) {
+            loader = new CursorLoader(this){
+
+                @Override
+                public Cursor loadInBackground() {
+                    mIsCreated = true;
+
+                    //Open the DB in read mode
+                    SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
+
+                    // Create a list of columns you want to return.
+                    String[] courseColumns = {
+                            CourseInfoEntry.COLUMN_COURSE_TITLE,
+                            CourseInfoEntry.COLUMN_COURSE_DESCRIPTION,
+                            CourseInfoEntry._ID};
+
+                    // Create an order by field for sorting purposes
+                    String courseOrderBy = CourseInfoEntry.COLUMN_COURSE_TITLE;
+
+                    // Populate your cursor with the results of the query
+                    return db.query(CourseInfoEntry.TABLE_NAME, courseColumns,
+                            null, null, null, null,
+                            courseOrderBy);
+                }
+            };
+        }
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
+        if (loader.getId() == LOADER_COURSES && mIsCreated) {
+            // Associate the cursor with your RecyclerAdapter
+            mCourseRecyclerAdapter.changeCursor(data);
+            mIsCreated = false;
+        }
+
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+        if (loader.getId() == LOADER_COURSES) {
+            // Change the cursor to null
+            mCourseRecyclerAdapter.changeCursor(null);
+        }
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        super.onResume();
+
+        //Use restart loader instead of initLoader to refresh each time instead of only the fist load
+        LoaderManager.getInstance(this).restartLoader(LOADER_COURSES, null, this);
+
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

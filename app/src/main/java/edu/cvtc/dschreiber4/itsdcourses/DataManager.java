@@ -12,9 +12,7 @@ public class DataManager {
     private static DataManager ourInstance = null;
     private List<CourseInfo> mCourses = new ArrayList<>();
 
-
     //Methods
-
     //Get instance
     public static DataManager getInstance(){
         if (ourInstance == null) {
@@ -22,8 +20,6 @@ public class DataManager {
         }
         return ourInstance;
     }
-
-
 
     //Return the list array of courses
     public List<CourseInfo> getCourses() {
@@ -51,19 +47,14 @@ public class DataManager {
             CourseInfo list = new CourseInfo(id, listTitle, listDescription);
 
             dm.mCourses.add(list);
-
-            //Close cursor
-            cursor.close();
         }
+        //Close cursor
+        cursor.close();
     }
 
-
-
     static void loadFromDatabase(ITSDCoursesOpenHelper dbHelper) {
-
         //Open the db in read mode
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-
 
         //Create a list array to return
         String[] courseColumns = {
@@ -82,11 +73,9 @@ public class DataManager {
 
         //Load the array list
         loadCoursesFromDatabase(courseCursor);
-
     }
 
     public int createNewCourse() {
-
         //Create and empty object for use on the activity screen.
         CourseInfo course = new CourseInfo(null ,null);
 
